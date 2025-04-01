@@ -5,16 +5,13 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"strings"
 )
 
-// Store representa o acesso ao armazenamento de dados
 type Store struct {
 	db     *sql.DB
 	logger *log.Logger
 }
 
-// NewStore cria uma nova instância de Store
 func NewStore(db *sql.DB) *Store {
 	if db == nil {
 		panic("database connection cannot be nil")
@@ -25,21 +22,11 @@ func NewStore(db *sql.DB) *Store {
 	}
 }
 
-// ProcessPasswordHashes processa os hashes de senha com base no prefixo fornecido
 func (s *Store) ProcessPasswordHashes(searchPrefix string) (*types.HashPrefix, error) {
-	if s.db == nil {
-		return nil, fmt.Errorf("database connection is nil")
-	}
-
-	if len(searchPrefix) != 5 {
-		return nil, fmt.Errorf("o prefixo de busca deve ter exatamente 5 caracteres")
-	}
-
-	// Usar prepared statement para evitar injeção SQL e usar o parâmetro searchPrefix
 	query := "SELECT passwordHash, count(*) FROM passwords WHERE passwordHash LIKE ? GROUP BY passwordHash;"
 	rows, err := s.db.Query(query, "%"+searchPrefix+"%")
 	if err != nil {
-		return nil, fmt.Errorf("erro ao executar a consulta: %w", err)
+		return nil, fmt.Errorf("error when execute query: %w", err)
 	}
 	defer rows.Close()
 
@@ -53,17 +40,7 @@ func (s *Store) ProcessPasswordHashes(searchPrefix string) (*types.HashPrefix, e
 		var count int
 
 		if err := rows.Scan(&fullHash, &count); err != nil {
-			return nil, fmt.Errorf("erro ao ler o resultado: %w", err)
-		}
-
-		if len(fullHash) <= 5 {
-			fmt.Printf("Hash ignorado por ser muito curto: %s\n", fullHash)
-			continue
-		}
-
-		if !strings.HasPrefix(strings.ToUpper(fullHash), strings.ToUpper(searchPrefix)) {
-			fmt.Printf("Hash ignorado por não começar com o prefixo %s: %s\n", searchPrefix, fullHash)
-			continue
+			return nil, fmt.Errorf("error to deserialize after execute query: %w", err)
 		}
 
 		suffix := fullHash[5:]
@@ -74,7 +51,7 @@ func (s *Store) ProcessPasswordHashes(searchPrefix string) (*types.HashPrefix, e
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("erro ao iterar sobre os resultados: %w", err)
+		return nil, fmt.Errorf("error while iterate over the results: %w", err)
 	}
 
 	return result, nil

@@ -3,7 +3,7 @@ package main
 import (
 	"SerasaLeaks/services/haveibeenleaked"
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql" // Importação do driver MySQL
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"

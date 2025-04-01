@@ -17,13 +17,13 @@ type Email struct {
 }
 
 type PasswordSuffix struct {
-	Suffix string
-	Count  int // número de ocorrências nos vazamentos
+	Suffix string `json:"suffix"`
+	Count  int    `json:"leak_count"`
 }
 
 type HashPrefix struct {
-	Prefix   string
-	Suffixes []PasswordSuffix
+	Prefix   string           `json:"prefix"`
+	Suffixes []PasswordSuffix `json:"suffixes"`
 }
 
 type PasswordStore interface {
