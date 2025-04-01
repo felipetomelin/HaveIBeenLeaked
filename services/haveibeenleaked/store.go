@@ -36,8 +36,8 @@ func (s *Store) ProcessPasswordHashes(searchPrefix string) (*types.HashPrefix, e
 	}
 
 	// Usar prepared statement para evitar injeção SQL e usar o parâmetro searchPrefix
-	query := "SELECT passwordHash, count FROM passwords WHERE passwordHash LIKE '%2e6f9%'"
-	rows, err := s.db.Query(query)
+	query := "SELECT passwordHash, count(*) FROM passwords WHERE passwordHash LIKE ? GROUP BY passwordHash;"
+	rows, err := s.db.Query(query, "%"+searchPrefix+"%")
 	if err != nil {
 		return nil, fmt.Errorf("erro ao executar a consulta: %w", err)
 	}
